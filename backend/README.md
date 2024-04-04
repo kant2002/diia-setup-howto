@@ -27,7 +27,40 @@ If you don't want Mongo cluster in your development workflow, try simpler [file]
 docker-compose up -d
 ```
 
-To run a particular service, see its README file.
+## Running other serivces
+
+These modifications you can use for non-cluster setup.
+```
+MONGO_HOST=localhost
+MONGO_HOSTS=localhost
+MONGO_REPLICA_SET=
+```
+
+Gateway service running
+
+```
+git clone https://github.com/kant2002/be-gateway-service
+cd be-gateway-service
+npm ci
+npm start
+cp .env.example .env
+```
+
+Auth service running
+```
+git clone https://github.com/kant2002/be-auth-service
+cd be-gateway-service
+npm ci
+npm start
+cp .env.example .env
+```
+
+```
+NODE_TLS_REJECT_UNAUTHORIZED=0
+BANK_ID_API_HOST=localhost
+BANK_ID_API_PORT=55032
+GRPC_BANK_ID_CRYPTO_SERVICE_ADDRESS=localhost:5192
+```
 
 ## gRPC
 

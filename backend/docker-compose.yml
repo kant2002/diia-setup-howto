@@ -18,12 +18,16 @@ services:
       - ALLOW_EMPTY_PASSWORD=yes
     ports:
       - '6379:6379'
+    # networks:
+    # - mongo-network
   rabbitmq:
     image: 'heidiks/rabbitmq-delayed-message-exchange'
     container_name: rabbitmq
     ports:
       - '5672:5672'
       - '15672:15672'
+    #networks:
+    #  - mongo-network
   mongo1:
     container_name: mongo1
     image: mongo:5
@@ -37,6 +41,46 @@ services:
         "/usr/bin/mongod",
         "--bind_ip_all",
       ]
+  # documents-service:
+  #   container_name: documents-service
+  #   image: be-documents-service
+  #   networks:
+  #     - mongo-network
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - redis
+  #     - rabbitmq
+  #   links:
+  #     - redis
+  #     - rabbitmq
+  bankid:
+    image: 'codevision/fakebankid:0.0.1'
+    environment:
+    #- ASPNETCORE_URLS=https://+:55032;http://+
+    #- ASPNETCORE_HTTPS_PORTS=55032
+    - ASPNETCORE_HTTPS_PORTS=8081
+    - ASPNETCORE_Kestrel__Certificates__Default__Password=12345678
+    - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+    ports:
+      - '55032:8081'
+    volumes:
+      - ./scripts:/https:ro
+  #crypto-grpc:
+  #  image: 'fakediiacrypto:0.0.1'
+  #  environment:
+  #  #- ASPNETCORE_URLS=https://+;http://+
+  #  #- ASPNETCORE_HTTPS_PORTS=5192
+  #  #- ASPNETCORE_URLS=https://+:5192;http://+
+  #  - ASPNETCORE_HTTPS_PORTS=8081
+  #  - ASPNETCORE_Kestrel__Certificates__Default__Password=12345678
+  #  - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+  #  - Logging__LogLevel__Grpc=Debug
+  #  - Logging__LogLevel__Microsoft=Debug
+  #  ports:
+  #    - '5192:8081'
+  #  volumes:
+  #    - ./scripts:/https:ro
 
 networks:
   mongo-network:
