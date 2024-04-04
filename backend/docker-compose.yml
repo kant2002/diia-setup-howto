@@ -31,8 +31,8 @@ services:
   mongo1:
     container_name: mongo1
     image: mongo:5
-    networks:
-      - mongo-network
+    #networks:
+    #  - mongo-network
     ports:
       - 27017:27017
     restart: always
@@ -41,19 +41,21 @@ services:
         "/usr/bin/mongod",
         "--bind_ip_all",
       ]
-  # documents-service:
-  #   container_name: documents-service
-  #   image: be-documents-service
-  #   networks:
-  #     - mongo-network
-  #   env_file:
-  #     - .env
-  #   depends_on:
-  #     - redis
-  #     - rabbitmq
-  #   links:
-  #     - redis
-  #     - rabbitmq
+  documents-service:
+    container_name: documents-service
+    image: codevision/be-documents-service
+    #networks:
+    #  - mongo-network
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - rabbitmq
+      - mongo1
+    links:
+      - redis
+      - rabbitmq
+      - mongo1
   bankid:
     image: 'codevision/fakebankid:0.0.1'
     environment:
@@ -82,6 +84,6 @@ services:
     volumes:
       - ./scripts:/https:ro
 
-networks:
-  mongo-network:
-    driver: bridge
+#networks:
+#  mongo-network:
+#    driver: bridge
