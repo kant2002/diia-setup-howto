@@ -1,0 +1,74 @@
+version: '3.9'
+services:
+  envoy:
+    image: envoyproxy/envoy:v1.29-latest
+    volumes:
+      - ./envoy.yaml:/etc/envoy/envoy.yaml
+      - ./public-service-catalog.pb:/transcoders/public-service-catalog.pb
+      - ./criminal-cert-service.pb:/transcoders/criminal-cert-service.pb
+    extra_hosts:
+      - 'auth-grpc:172.17.0.1'
+      - 'criminal-cert-grpc:172.17.0.1'
+      - 'public-service-catalog-grpc:172.17.0.1'
+    ports:
+      - 9090:9090
+  redis:
+    image: 'bitnami/redis:latest'
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - '6379:6379'
+    # networks:
+    # - mongo-network
+  rabbitmq:
+    image: 'heidiks/rabbitmq-delayed-message-exchange'
+    container_name: rabbitmq
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    #networks:
+    #  - mongo-network
+  mongo1:
+    container_name: mongo1
+    image: mongo:5
+    #networks:
+    #  - mongo-network
+    ports:
+      - 27017:27017
+    restart: always
+    entrypoint:
+      [
+        "/usr/bin/mongod",
+        "--bind_ip_all",
+      ]
+  bankid:
+    image: 'codevision/fakebankid:0.0.2'
+    environment:
+    - ASPNETCORE_URLS=https://+:8081;http://+
+    #- ASPNETCORE_HTTPS_PORTS=55032
+    - ASPNETCORE_HTTPS_PORTS=8081
+    - ASPNETCORE_Kestrel__Certificates__Default__Password=12345678
+    - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+    ports:
+      - '55032:8081'
+    volumes:
+      - ./scripts:/https:ro
+  crypto-grpc:
+    image: 'codevision/fakediiacrypto:0.0.1'
+    environment:
+    #- ASPNETCORE_URLS=https://+;http://+
+    #- ASPNETCORE_HTTPS_PORTS=5192
+    #- ASPNETCORE_URLS=https://+:5192;http://+
+    - ASPNETCORE_HTTPS_PORTS=8081
+    - ASPNETCORE_Kestrel__Certificates__Default__Password=12345678
+    - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+    - Logging__LogLevel__Grpc=Trace
+    - Logging__LogLevel__Microsoft=Trace
+    ports:
+      - '5192:8080'
+    volumes:
+      - ./scripts:/https:ro
+
+#networks:
+#  mongo-network:
+#    driver: bridge
