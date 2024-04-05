@@ -41,6 +41,18 @@ services:
         "/usr/bin/mongod",
         "--bind_ip_all",
       ]
+  gateway-service:
+    container_name: gateway-service
+    image: codevision/be-gateway-service:0.0.1
+    ports:
+      - 8080:8080
+    env_file:
+      - .env
+      - .env.gateway
+    depends_on:
+      - redis
+      - rabbitmq
+      - mongo1
   documents-service:
     container_name: documents-service
     image: codevision/be-documents-service
