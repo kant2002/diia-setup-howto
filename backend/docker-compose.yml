@@ -53,6 +53,16 @@ services:
       - redis
       - rabbitmq
       - mongo1
+  public-service-catalog:
+    container_name: public-service-catalog
+    image: codevision/be-public-service-catalog:0.0.1
+    env_file:
+      - .env
+      - .env.public-service-catalog
+    depends_on:
+      - redis
+      - rabbitmq
+      - mongo1
   documents-service:
     container_name: documents-service
     image: codevision/be-documents-service
