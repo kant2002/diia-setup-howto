@@ -63,6 +63,16 @@ services:
       - redis
       - rabbitmq
       - mongo1
+  user-service:
+    container_name: user-service
+    image: codevision/be-user-service:0.0.1
+    env_file:
+      - .env
+      - .env.user
+    depends_on:
+      - redis
+      - rabbitmq
+      - mongo1
   documents-service:
     container_name: documents-service
     image: codevision/be-documents-service
