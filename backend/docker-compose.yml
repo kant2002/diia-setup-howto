@@ -48,6 +48,7 @@ services:
     #  - mongo-network
     env_file:
       - .env
+      - .env.documents
     depends_on:
       - redis
       - rabbitmq
@@ -56,10 +57,26 @@ services:
       - redis
       - rabbitmq
       - mongo1
+  auth-service:
+    container_name: auth-service
+    image: codevision/be-auth-service:0.0.3
+    #networks:
+    #  - mongo-network
+    env_file:
+      - .env
+      - .env.auth
+    depends_on:
+      - redis
+      - rabbitmq
+      - mongo1
+      - bankid
+      - crypto-grpc
+    volumes:
+      - ./secrets:/home/node/app/secrets:ro
   bankid:
-    image: 'codevision/fakebankid:0.0.1'
+    image: 'codevision/fakebankid:0.0.2'
     environment:
-    #- ASPNETCORE_URLS=https://+:55032;http://+
+    - ASPNETCORE_URLS=https://+:8081;http://+
     #- ASPNETCORE_HTTPS_PORTS=55032
     - ASPNETCORE_HTTPS_PORTS=8081
     - ASPNETCORE_Kestrel__Certificates__Default__Password=12345678
@@ -69,7 +86,7 @@ services:
     volumes:
       - ./scripts:/https:ro
   crypto-grpc:
-    image: 'fakediiacrypto:0.0.1'
+    image: 'codevision/fakediiacrypto:0.0.1'
     environment:
     #- ASPNETCORE_URLS=https://+;http://+
     #- ASPNETCORE_HTTPS_PORTS=5192

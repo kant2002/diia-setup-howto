@@ -27,6 +27,16 @@ If you don't want Mongo cluster in your development workflow, try simpler [file]
 docker-compose up -d
 ```
 
+## Create self-signed certificates for fake services
+
+```
+openssl genrsa -out key.pem 2048
+openssl req -new -sha256 -key key.pem -subj "/C=UA/ST=Kiiv/O=Diia in Action/CN=localhost" -addext "subjectAltName=DNS:localhost,DNS:bankid" -out csr.csr
+openssl req -x509 -sha256 -days 365 -key key.pem -in csr.csr -out certificate.pem -copy_extensions copy
+
+openssl pkcs12 -export -inkey key.pem -in certificate.pem -out aspnetapp.pfx -password pass:12345678
+```
+
 ## Running other serivces
 
 These modifications you can use for non-cluster setup.
@@ -60,6 +70,12 @@ NODE_TLS_REJECT_UNAUTHORIZED=0
 BANK_ID_API_HOST=localhost
 BANK_ID_API_PORT=55032
 GRPC_BANK_ID_CRYPTO_SERVICE_ADDRESS=localhost:5192
+```
+
+## Populating with data
+
+```
+docker exec -ti auth-service npm run migrate-deploy
 ```
 
 ## gRPC
